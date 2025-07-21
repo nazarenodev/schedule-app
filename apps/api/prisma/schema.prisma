@@ -15,34 +15,35 @@ model User {
   password  String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  events    Event[]
-  schedules Schedule[]
 }
 
-model Event {
+model EventType {
+  id                String         @id @default(uuid())
+  name              String
+  durationInMinutes Int
+  ownerId           String
+
+  availabilities    Availability[]
+  bookings          Booking[]
+
+  @@unique([name, ownerId]) // An owner cannot have two event types with the same name
+}
+
+model Availability {
   id          String    @id @default(uuid())
-  title       String
-  description String?
   startTime   DateTime
   endTime     DateTime
-  location    String?
-  creatorId   String
-  creator     User      @relation(fields: [creatorId], references: [id])
-  schedules   Schedule[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  eventType   EventType @relation(fields: [eventTypeId], references: [id])
+  eventTypeId String
 }
 
-model Schedule {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  eventId   String
-  event     Event    @relation(fields: [eventId], references: [id])
-  status    String   @default("pending") // e.g., "pending", "accepted", "declined"
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Booking {
+  id          String   @id @default(uuid())
+  bookerId    String
+  startTime   DateTime
+  endTime     DateTime
 
-  @@unique([userId, eventId]) // A user can only have one schedule entry per event
+  eventType   EventType @relation(fields: [eventTypeId], references: [id])
+  eventTypeId String
 }

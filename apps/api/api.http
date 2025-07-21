@@ -1,0 +1,86 @@
+###
+# API Test Requests for Scheduling Service
+#
+# Variables:
+# - host: The base URL of your running NestJS application
+# - ownerId: A sample ID for the event owner
+# - bookerId: A sample ID for the person booking the event
+# - eventTypeId: Will be captured from the Create Event Type request
+###
+
+@host = http://localhost:4000
+@ownerId = user_john_doe
+@bookerId = user_jane_doe
+@eventTypeId =
+
+### 1. Create a new Event Type
+# @name createEventType
+POST {{host}}/scheduler/event-types
+Content-Type: application/json
+
+{
+    "name": "30 Minute Discovery Call",
+    "durationInMinutes": 30,
+    "ownerId": "{{ownerId}}"
+}
+
+### Capture the created event type ID
+@eventTypeId = {{createEventType.response.body.id}}
+
+### 2. Add Availability for the Event Type
+# This makes the owner available today from 2 PM to 4 PM.
+# NOTE: Adjust the date/time to be in the future.
+POST {{host}}/scheduler/availability
+Content-Type: application/json
+
+{
+    "eventTypeId": "{{eventTypeId}}",
+    "startTime": "2025-07-21T14:00:00.000Z",
+    "endTime": "2025-07-21T16:00:00.000Z"
+}
+
+### 3. Get Available Slots for the Event Type
+# You should see slots like 14:00, 14:30, 15:00, 15:30
+GET {{host}}/scheduler/availability/slots/{{eventTypeId}}
+
+
+### 4. Book a Slot
+# Let's book the 2:30 PM slot.
+# @name bookSlot
+POST {{host}}/scheduler/bookings
+Content-Type: application/json
+
+{
+    "bookerId": "{{bookerId}}",
+    "eventTypeId": "{{eventTypeId}}",
+    "startTime": "2025-07-21T14:30:00.000Z",
+    "endTime": "2025-07-21T15:00:00.000Z"
+}
+
+### 5. Get Available Slots Again
+# The 2:30 PM slot should now be gone.
+GET {{host}}/scheduler/availability/slots/{{eventTypeId}}
+
+
+### 6. Try to book a conflicting slot (for the booker)
+# This should fail with a 409 Conflict error because it overlaps
+# with the 2:30 - 3:00 PM slot Jane already booked.
+POST {{host}}/scheduler/bookings
+Content-Type: application/json
+
+{
+    "bookerId": "{{bookerId}}",
+    "eventTypeId": "{{eventTypeId}}",
+    "startTime": "2025-07-21T14:45:00.000Z",
+    "endTime": "2025-07-21T15:15:00.000Z"
+}
+
+
+### 7. Get all bookings for the Owner
+# Should show the booking made by Jane.
+GET {{host}}/scheduler/bookings/{{ownerId}}
+
+
+### 8. Get all bookings for the Booker
+# Should show the booking made by Jane.
+GET {{host}}/scheduler/bookings/{{bookerId}}
