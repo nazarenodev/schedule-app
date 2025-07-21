@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  # postgres:
+  #   image: postgres:15
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_USER=user
+  #     - POSTGRES_PASSWORD=password
+  #     - POSTGRES_DB=scheduler
+  #   ports:
+  #     - '5432:5432'
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+  # vvv Add this new service for testing vvv
+  postgres-test:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=scheduler-test # A separate database name
+    ports:
+      - '5433:5432' # Expose on a different host port to avoid conflicts
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+volumes:
+  # postgres_data:
+  postgres_test_data:

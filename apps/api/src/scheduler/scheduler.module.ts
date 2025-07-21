@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { SchedulerController } from './scheduler.controller';
 import { SchedulerService } from './scheduler.service';
-import { PrismaProvider } from 'src/db/prisma.provider';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({    
+    imports: [PrismaModule],
     controllers: [SchedulerController],
-    providers: [PrismaProvider, SchedulerService],
+    providers: [SchedulerService],
 })
 export class SchedulerModule {}

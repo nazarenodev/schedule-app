@@ -1,10 +1,10 @@
 import { Injectable, OnModuleInit, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { PrismaProvider } from 'src/db/prisma.provider';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { TimeSlot } from '@scheduler/core'; // Assuming core logic is in a parent folder
 
 @Injectable()
 export class SchedulerService {
-    constructor(private prisma: PrismaProvider) {}
+    constructor(private prisma: PrismaService) {}
 
     async createEventType(name: string, durationInMinutes: number, ownerId: string) {
         // Prisma's `@@unique` constraint handles the check, but we can provide a friendlier error.
